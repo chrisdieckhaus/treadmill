@@ -1,7 +1,7 @@
 //This will be used for playing around with C and linked lists.#include "fs.h"
 #include <stdlib.h>
 #include <stdio.h>
-
+#define HEAP_SIZE 10
 //type: 0 = null, 1 = IND, 2 = INT
 
 struct node {
@@ -21,17 +21,11 @@ struct pointr{
 	
 
 struct node *head = NULL;
+struct node * curr = NULL;
 struct pointr *grey_ptr = NULL;
 struct pointr *black_ptr = NULL;
 struct pointr *free_ptr = NULL;
 struct pointr *white_ptr = NULL;
-
-int main(int argc, char** argv){
-	
-	init_heap(10);	//parameter is total space in memory (# of links in LL)
-	
-	return 0;
-}
 
 void init_heap(int length){
 	//add heap objects
@@ -39,21 +33,18 @@ void init_heap(int length){
 	int val1s[4] = {2,5,10,3};
 	int val2s[4] = {0,0,0,0};
 	char *types[] = {"IND","IND","INT","IND"};
-
 	white_ptr = malloc(sizeof(struct pointr));
 	black_ptr = malloc(sizeof(struct pointr));
 	grey_ptr = malloc(sizeof(struct pointr));
 	free_ptr = malloc(sizeof(struct pointr));
-
 	if (head==NULL){
 		head = malloc(sizeof(struct node));
 		head->address = 0;
 		head->next = NULL;
 		head->prev = NULL;
 	}
-	struct node * curr = malloc(sizeof(struct node));
+	curr = malloc(sizeof(struct node));
 	curr = head;
-	
 	int i;
 	for (i=0; i<length; i++){
 		struct node * ptr = malloc(sizeof(struct node));
@@ -63,7 +54,6 @@ void init_heap(int length){
 		ptr->val2 = 0;
 		ptr->type = NULL;
 		ptr->color = "ecru";
-
 		ptr->next = NULL;
 		ptr->prev = curr;
 		curr->next = ptr;
@@ -72,39 +62,25 @@ void init_heap(int length){
 	curr->next = head;
 	head->prev = curr;
 	curr = head;
-	
 	int j;
 	for (j=0; j<allocate; j++){
-
 		curr->address = j*3;
 		curr->val1 = val1s[j];
 		curr->val2 = 0;
 		curr->type = types[j];
 		curr->color = "white";
-		curr = curr->next;
-		
+		curr = curr->next;	
 	}
-
 	free_ptr->name = "FREE";
 	free_ptr->points_to = curr;
-
 	curr = head;
-
-	
 	white_ptr->name = "WHITE";
 	white_ptr->points_to = head;
-	
 	black_ptr->name = "BLACK";
 	black_ptr->points_to = head;
-	
 	grey_ptr->name = "GREY";
 	grey_ptr->points_to = head;
-	
-	for (i=0; i<length; i++){
-		printf("%d | %s | %d | %d | %s\n", curr->address, curr->type, curr->val1, curr->val2, curr->color);
-		curr = curr->next;
-	}
-	
+	print_list();
 	print_pointers();
 }
 
@@ -114,6 +90,24 @@ void print_pointers(){
 	printf("%s points to %d | %s | %d | %d\n", grey_ptr->name, grey_ptr->points_to->address, grey_ptr->points_to->type, grey_ptr->points_to->val1, grey_ptr->points_to->val2);
 	printf("%s points to %d | %s | %d | %d\n", free_ptr->name, free_ptr->points_to->address, free_ptr->points_to->type, free_ptr->points_to->val1, free_ptr->points_to->val2);
 }
+
+void print_list(){
+	curr = head;
+	int i;
+	for (i=0; i<HEAP_SIZE; i++){
+		printf("%d | %s | %d | %d | %s\n", curr->address, curr->type, curr->val1, curr->val2, curr->color);
+		curr = curr->next;
+	}
+}
+
+int main(int argc, char** argv){
+	
+	init_heap(10);	//parameter is total space in memory (# of links in LL)
+	
+	return 0;
+}
+
+
 
 
 

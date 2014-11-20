@@ -41,7 +41,7 @@ void createList(int length){
 	head->prev = curr;
 	curr = head;
 	while (curr != NULL){
-		printf("%d ", curr->data);
+		printf("%d", curr->data);
 		curr = curr->next;
 	}
 }

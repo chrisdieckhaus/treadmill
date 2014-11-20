@@ -80,7 +80,7 @@ void init_heap(int length){
 		curr->val1 = val1s[j];
 		curr->val2 = 0;
 		curr->type = types[j];
-		curr->color = "white";
+		printf("curr = %d\n", curr->address);
 		curr = curr->next;
 		
 	}

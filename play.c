@@ -103,7 +103,7 @@ void print_list(){
 
 void start_gc(int roots[]){
 	move_to_grey(roots[0]);
-	move_to_grey(6);
+	move_to_grey(3);
 }
 
 void find_node(int addr){
@@ -121,6 +121,7 @@ void move_to_grey(addr){
 		head = head->next;
 	}else{
 		find_node(addr); //set curr to the node we're looking for
+		printf("curr %d\n", curr->address);
 		curr->prev->next = curr->next;
 		curr->next->prev = curr->prev;
 		grey_ptr->points_to->prev->next = curr;

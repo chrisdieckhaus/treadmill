@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #define HEAP_SIZE 10
+
 //type: 0 = null, 1 = IND, 2 = INT
 
 struct node {
@@ -30,7 +31,7 @@ struct pointr *white_ptr = NULL;
 void init_heap(int length){
 	//add heap objects
 	int allocate = 4;
-	int val1s[4] = {2,5,10,3};
+	int val1s[4] = {3,5,10,2};
 	int val2s[4] = {0,0,0,0};
 	char *types[] = {"IND","IND","INT","IND"};
 	white_ptr = malloc(sizeof(struct pointr));
@@ -48,8 +49,8 @@ void init_heap(int length){
 	int i;
 	for (i=0; i<length; i++){
 		struct node * ptr = malloc(sizeof(struct node));
-		ptr->address = 0;
-		ptr->type = 0;
+		ptr->address = -1;
+		ptr->type = NULL;
 		ptr->val1 = 0;
 		ptr->val2 = 0;
 		ptr->type = NULL;
@@ -94,16 +95,49 @@ void print_pointers(){
 void print_list(){
 	curr = head;
 	int i;
-	for (i=0; i<HEAP_SIZE; i++){
+	for (i=0; i<HEAP_SIZE+1; i++){
 		printf("%d | %s | %d | %d | %s\n", curr->address, curr->type, curr->val1, curr->val2, curr->color);
 		curr = curr->next;
 	}
 }
 
+void start_gc(int roots[]){
+	move_to_grey(roots[0]);
+	move_to_grey(6);
+}
+
+void find_node(int addr){
+	curr = head;
+	int i;
+	for (i=0; i<HEAP_SIZE; i++){
+		if (curr->address == addr){
+			return;
+		}else{
+			curr = curr->next;}}}
+
+void move_to_grey(addr){
+	if (addr == head->address){
+		head->color = "grey";
+		head = head->next;
+	}else{
+		find_node(addr); //set curr to the node we're looking for
+		curr->prev->next = curr->next;
+		curr->next->prev = curr->prev;
+		grey_ptr->points_to->prev->next = curr;
+		curr->prev = grey_ptr->points_to->prev;
+		curr->next = grey_ptr->points_to;
+		grey_ptr->points_to->prev = curr;
+		curr->color = "grey";
+		grey_ptr->points_to = curr;
+	}
+	print_list();
+	print_pointers();
+}
+
 int main(int argc, char** argv){
-	
+	int roots[] = {6};
 	init_heap(10);	//parameter is total space in memory (# of links in LL)
-	
+	start_gc(roots);
 	return 0;
 }
 

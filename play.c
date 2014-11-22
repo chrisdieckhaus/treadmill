@@ -102,11 +102,13 @@ void print_list(){
 }
 
 void start_gc(int roots[]){
-	move_to_grey(roots[0]);
-	move_to_grey(3);
+	move_to_grey(roots[0]); //6
+	move_to_grey(0);
+	move_to_black(6);
 	move_to_grey(9);
-	move_to_black(3);
-
+	move_to_black(0);
+	move_to_black(9);
+	move_to_grey(3);
 }
 
 void find_node(int addr){
@@ -119,11 +121,18 @@ void find_node(int addr){
 			curr = curr->next;}}}
 
 void move_to_grey(addr){
+/*
 	if (addr == head->address){
 		head->color = "grey";
+		white_ptr->points_to = head->next;
+		printf("head: %d | %s | %d | %d | %s\n", head->address, head->type, head->val1, head->val2, head->color);
 		head = head->next;
 	}else{
+*/
 		find_node(addr); //set curr to the node we're looking for
+		if (white_ptr->points_to->address == curr->address){
+			white_ptr->points_to = curr->next;
+		}
 		printf("curr %d\n", curr->address);
 		curr->prev->next = curr->next;
 		curr->next->prev = curr->prev;
@@ -132,16 +141,20 @@ void move_to_grey(addr){
 		curr->next = grey_ptr->points_to;
 		grey_ptr->points_to->prev = curr;
 		curr->color = "grey";
+		if (black_ptr->points_to->address == grey_ptr->points_to->address) {
+			printf("trigger\n");
+			black_ptr->points_to = curr;
+		}
 		grey_ptr->points_to = curr;
-		black_ptr->points_to = curr;
-	}
+		
+	//}
 	print_list();
 	print_pointers();
 }
 
 void move_to_black(addr){
 	find_node(addr); //set curr to the node we're looking for
-		printf("curr %d\n", curr->address);
+	printf("curr %d\n", curr->address);
 	curr->prev->next = curr->next;
 	curr->next->prev = curr->prev;
 	black_ptr->points_to->prev->next = curr;
@@ -149,6 +162,9 @@ void move_to_black(addr){
 	curr->next = black_ptr->points_to;
 	black_ptr->points_to->prev = curr;
 	curr->color = "black";
+	if (black_ptr->points_to->address == grey_ptr->points_to->address) {
+			grey_ptr->points_to = white_ptr->points_to;
+		}
 	black_ptr->points_to = curr;
 	print_list();
 	print_pointers();

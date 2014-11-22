@@ -33,7 +33,7 @@ void init_heap(int length){
 	int allocate = 4;
 	int val1s[4] = {4,6,10,3};
 	int val2s[4] = {0,0,0,0};
-	char *types[] = {"IND","IND","INT","IND"};
+	char *types[] = {"IND","CONS","INT","IND"};
 	white_ptr = malloc(sizeof(struct pointr));
 	black_ptr = malloc(sizeof(struct pointr));
 	grey_ptr = malloc(sizeof(struct pointr));
@@ -167,8 +167,9 @@ void parse_structure(addr){
     printf("node to parse: %d | %s | %d | %d | %s\n", curr->address, curr->type, curr->val1, curr->val2, curr->color);
     if (curr->type == "IND"){
         move_to_grey(curr->val1);
-    } else if (curr->type == "INT"){
-        
+    } else if (curr->type == "CONS"){
+        move_to_grey(curr->val1);
+        move_to_grey(curr->val2);
     }
 }
 

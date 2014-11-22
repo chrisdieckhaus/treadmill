@@ -109,6 +109,7 @@ void start_gc(int roots[]){
 	move_to_black(0);
 	move_to_black(9);
 	move_to_grey(3);
+	move_to_black(3);
 }
 
 void find_node(int addr){
@@ -141,10 +142,11 @@ void move_to_grey(addr){
 		curr->next = grey_ptr->points_to;
 		grey_ptr->points_to->prev = curr;
 		curr->color = "grey";
-		if (black_ptr->points_to->address == grey_ptr->points_to->address) {
-			printf("trigger\n");
-			black_ptr->points_to = curr;
-		}
+		//if (black_ptr->points_to->address == grey_ptr->points_to->address) {
+			//printf("trigger\n");
+			//printf("curr loopp %d\n", curr->address);
+			//black_ptr->points_to = curr;
+		//}
 		grey_ptr->points_to = curr;
 		
 	//}

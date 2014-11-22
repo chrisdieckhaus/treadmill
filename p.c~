@@ -141,10 +141,11 @@ void move_to_grey(addr){
 		curr->next = grey_ptr->points_to;
 		grey_ptr->points_to->prev = curr;
 		curr->color = "grey";
-		if (black_ptr->points_to->address == grey_ptr->points_to->address) {
-			printf("trigger\n");
-			black_ptr->points_to = curr;
-		}
+		//if (black_ptr->points_to->address == grey_ptr->points_to->address) {
+			//printf("trigger\n");
+			//printf("curr loopp %d\n", curr->address);
+			//black_ptr->points_to = curr;
+		//}
 		grey_ptr->points_to = curr;
 		
 	//}
@@ -166,10 +167,7 @@ void move_to_black(addr){
 	printf("grey: %d\n", grey_ptr->points_to->address);
 	
 	black_ptr->points_to = curr;
-	if (black_ptr->points_to->address == grey_ptr->points_to->address) {
-			printf("here\n");
-			grey_ptr->points_to = white_ptr->points_to;
-	}
+	
 	print_list();
 	print_pointers();
 }

@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #define HEAP_SIZE 10
-
+#define ALLOCATE 4
+#define NUM_ROOTS 2
 //type: 0 = null, 1 = IND, 2 = INT
 
 struct node {
@@ -31,8 +32,8 @@ struct pointr *white_ptr = NULL;
 void init_heap(int length){
 	//add heap objects
 	int allocate = 4;
-	int val1s[4] = {4,6,10,3};
-	int val2s[4] = {0,0,0,0};
+	int val1s[ALLOCATE] = {4,6,10,3};
+	int val2s[ALLOCATE] = {0,0,0,0};
 	char *types[] = {"IND","CONS","INT","IND"};
 	white_ptr = malloc(sizeof(struct pointr));
 	black_ptr = malloc(sizeof(struct pointr));
@@ -102,7 +103,11 @@ void print_list(){
 }
 
 void start_gc(int roots[]){
-	move_to_grey(roots[0]); //9
+        int i;
+        for (i=0; i<NUM_ROOTS; i++){
+            move_to_grey(roots[i]);
+        }
+	 //9
         scan_node(roots[0]);
         print_list();
 	print_pointers();
@@ -174,9 +179,9 @@ void parse_structure(addr){
 }
 
 int main(int argc, char** argv){
-	int roots[] = {9};
+	int roots[] = {9,6};
 	init_heap(10);	//parameter is total space in memory (# of links in LL)
-	start_gc(roots);
+        start_gc(roots);
 	return 0;
 }
 

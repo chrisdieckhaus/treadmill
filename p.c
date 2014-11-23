@@ -29,12 +29,10 @@ struct pointr *black_ptr = NULL;
 struct pointr *free_ptr = NULL;
 struct pointr *white_ptr = NULL;
 
-void init_heap(int length){
+void init_heap(int length, int val1s[], int val2s[], char *types[]){
 	printf("Init heap of size %d\n", HEAP_SIZE);
 	//add heap objects
-	int val1s[ALLOCATE] = {0,0,0,18,6,9,0,9,4,0,15};
-	int val2s[ALLOCATE] = {0,0,21,21,7,3,0,3,0,0,0};
-	char *types[] = {"INT","NULL","CONS","CONS","CONS","CONS","IND","CONS","INT","NULL","IND"};
+	
 	white_ptr = malloc(sizeof(struct pointr));
 	black_ptr = malloc(sizeof(struct pointr));
 	grey_ptr = malloc(sizeof(struct pointr));
@@ -209,6 +207,7 @@ void take_out_trash(){
 	int i;
 	for (i=0; i<HEAP_SIZE; i++){
 		if (curr->color == "white"){
+			printf("Removing %d from heap\n", curr->address);
 			curr->address = -1;
 			curr->type = NULL;
 			curr->val1 = 0;
@@ -264,14 +263,19 @@ int check_memory(int num){
 
 int main(int argc, char** argv){
 	int roots[] = {21,0,3,12};
-	init_heap(HEAP_SIZE);	//parameter is total space in memory (# of links in LL)
+	int v1[ALLOCATE] = {0,0,0,9,4,0,15};
+	int v2[ALLOCATE] = {0,0,21,3,0,0,0};
+	char *ntypes[] = {"INT","NULL","CONS","CONS","CONS","CONS","IND","CONS","INT","NULL","IND"};
+	init_heap(HEAP_SIZE, v1, v2, ntypes);	//parameter is total space in memory (# of links in LL)
     start_gc(roots, NUM_ROOTS);
+
 	int nr[] = {30};
 	int nv1[] = {4,3,6};
 	int nv2[] = {0,0,24};
 	char *nt[] = {"INT", "IND", "CONS"};
 	int x = sizeof(nv1)/sizeof(nv1[0]);
 	mutate(nr, nv1, nv2, nt, x);
+
 	return 0;
 }
 

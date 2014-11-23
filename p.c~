@@ -1,9 +1,9 @@
 //This will be used for playing around with C and linked lists.#include "fs.h"
 #include <stdlib.h>
 #include <stdio.h>
-#define HEAP_SIZE 15
-#define ALLOCATE 11
-#define NUM_ROOTS 4
+#define HEAP_SIZE 15 	//how many total memory spots in linked list?
+#define ALLOCATE 11		//how many objects in heap?
+#define NUM_ROOTS 4		//how many roots?
 //type: 0 = null, 1 = IND, 2 = INT
 
 struct node {
@@ -111,6 +111,7 @@ void start_gc(int roots[]){
     scan_node(roots[0]);
     print_list();
 	print_pointers();
+	take_out_trash();
 }
 
 void find_node(int addr){
@@ -160,9 +161,7 @@ void move_to_black(addr){
 	curr->next = black_ptr->points_to;
 	black_ptr->points_to->prev = curr;
 	curr->color = "black";
-	
 	black_ptr->points_to = curr;
-	
 	print_list();
 	print_pointers();
 }
@@ -203,6 +202,23 @@ void parse_structure(addr){
         	move_to_grey(curr->val2);
 		}else{printf("Already moved %d\n", curr->address);}
     }
+}
+
+void take_out_trash(){
+	printf("Taking out the trash\n");
+	curr = head;
+	int i;
+	free_ptr->points_to = curr;
+	for (i=0; i<HEAP_SIZE; i++){
+		if (curr->color == "white"){
+			curr->address = -1;
+			curr->type = NULL;
+			curr->val1 = 0;
+			curr->val2 = 0;
+			curr->type = NULL;
+			curr->color = "ecru";
+		}
+		curr = curr->next;}
 }
 
 int main(int argc, char** argv){

@@ -107,7 +107,6 @@ void start_gc(int roots[]){
     for (i=0; i<NUM_ROOTS; i++){
         move_to_grey(roots[i]);
     }
- //9
     scan_node(roots[0]);
     print_list();
 	print_pointers();
@@ -225,7 +224,7 @@ void take_out_trash(){
 int main(int argc, char** argv){
 	int roots[] = {21,0,3,12};
 	init_heap(HEAP_SIZE);	//parameter is total space in memory (# of links in LL)
-    start_gc(roots);
+    //start_gc(roots);
 	return 0;
 }
 

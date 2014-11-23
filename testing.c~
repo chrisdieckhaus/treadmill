@@ -16,6 +16,17 @@ struct node {
 	struct node *prev;
 };
 
+struct node2{
+	int address;
+	const char *type;
+	const char *color;
+	struct node *next;
+	struct node *prev;
+	struct heap_cell *contents;
+};
+
+struct
+
 struct pointr{
 	const char *name;
 	struct node *points_to;
@@ -29,6 +40,53 @@ struct pointr *black_ptr = NULL;
 struct pointr *free_ptr = NULL;
 struct pointr *white_ptr = NULL;
 
+struct node2 *head2 = NULL;
+struct node2 * curr2 = NULL;
+
+void new_print(){
+	curr2 = head2;
+	int i;
+	for (i=0; i<HEAP_SIZE+1; i++){
+		printf("%d | %s | %s\n", curr2->address, curr2->type, curr2->color);
+		curr2 = curr2->next;
+	}
+}
+
+void new_init(int length){
+	printf("Hi new init %d\n", length);
+	char *types[] = {"INT","NULL","CONS","CONS","CONS","CONS","IND","CONS","INT","NULL","IND"};
+	if (head2==NULL){
+		head2 = malloc(sizeof(struct node2));
+		head2->address = 0;
+		head2->next = NULL;
+		head2->prev = NULL;
+	}
+	curr2 = malloc(sizeof(struct node2));
+	curr2 = head2;
+	int i;
+	for (i=0; i<length; i++){
+		struct node2 * ptr2 = malloc(sizeof(struct node2));
+		ptr2->address = -1;
+		ptr2->type = NULL;
+		ptr2->color = "ecru";
+		ptr2->next = NULL;
+		ptr2->prev = curr2;
+		curr2->next = ptr2;
+		curr2 = ptr2;
+	}
+	curr2->next = head2;
+	head2->prev = curr2;
+	curr2 = head2;
+	int j;
+	for (j=0; j<ALLOCATE; j++){
+		curr2->address = j*3;
+		curr2->type = types[j];
+		curr2->color = "white";
+		curr2 = curr2->next;	
+	}
+	new_print();
+}
+/*
 void init_heap(int length){
 	printf("Init heap of size %d\n", HEAP_SIZE);
 	//add heap objects
@@ -82,148 +140,29 @@ void init_heap(int length){
 	black_ptr->points_to = head;
 	grey_ptr->name = "GREY";
 	grey_ptr->points_to = head;
-	//print_list();
-	//print_pointers();
 }
+*/
 
-void print_pointers(){
-	printf("%s points to %d | %s | %d | %d\n", white_ptr->name, white_ptr->points_to->address, white_ptr->points_to->type, white_ptr->points_to->val1, white_ptr->points_to->val2);
-	printf("%s points to %d | %s | %d | %d\n", black_ptr->name, black_ptr->points_to->address, black_ptr->points_to->type, black_ptr->points_to->val1, black_ptr->points_to->val2);
-	printf("%s points to %d | %s | %d | %d\n", grey_ptr->name, grey_ptr->points_to->address, grey_ptr->points_to->type, grey_ptr->points_to->val1, grey_ptr->points_to->val2);
-	printf("%s points to %d | %s | %d | %d\n", free_ptr->name, free_ptr->points_to->address, free_ptr->points_to->type, free_ptr->points_to->val1, free_ptr->points_to->val2);
-}
 
-void print_list(){
-	curr = head;
-	int i;
-	for (i=0; i<HEAP_SIZE+1; i++){
-		printf("%d | %s | %d | %d | %s\n", curr->address, curr->type, curr->val1, curr->val2, curr->color);
-		curr = curr->next;
-	}
-}
 
-void start_gc(int roots[]){
-    int i;
-    for (i=0; i<NUM_ROOTS; i++){
-        move_to_grey(roots[i]);
-    }
-    scan_node(roots[0]);
-    print_list();
-	print_pointers();
-	take_out_trash();
-}
 
 void find_node(int addr){
-	curr = head;
+	curr2 = head2;
 	int i;
 	for (i=0; i<HEAP_SIZE; i++){
-		if (curr->address == addr){
+		if (curr2->address == addr){
 			return;
 		}else{
-			curr = curr->next;}}}
+			curr2 = curr2->next;}}}
 
-void move_to_grey(addr){
-	find_node(addr); //set curr to the node we're looking for
-	if (white_ptr->points_to->address == curr->address){
-		white_ptr->points_to = curr->next;
-	} else {
-		curr->prev->next = curr->next;
-		curr->next->prev = curr->prev;
-		grey_ptr->points_to->prev->next = curr;
-		curr->prev = grey_ptr->points_to->prev;
-		curr->next = grey_ptr->points_to;
-		grey_ptr->points_to->prev = curr;
-	}	
-	curr->color = "grey";
-	grey_ptr->points_to = curr;
-	print_list();
-	print_pointers();
-}
 
-void move_to_black(addr){
-	find_node(addr); //set curr to the node we're looking for
-	if (white_ptr->points_to->address == curr->address){
-		white_ptr->points_to = curr->next;
-		grey_ptr->points_to = curr->next;
-	}
-	if (grey_ptr->points_to->address == curr->address){
-		if (curr->next->color == "grey"){
-			grey_ptr->points_to = curr->next;
-		}else if (curr->prev->color == "grey"){
-			grey_ptr->points_to = curr->prev;
-		}		
-	}
-	curr->prev->next = curr->next;
-	curr->next->prev = curr->prev;
-	black_ptr->points_to->prev->next = curr;
-	curr->prev = black_ptr->points_to->prev;
-	curr->next = black_ptr->points_to;
-	black_ptr->points_to->prev = curr;
-	curr->color = "black";
-	black_ptr->points_to = curr;
-	print_list();
-	print_pointers();
-}
 
-void scan_node(addr){
-    find_node(addr);
-    printf("Scanning node %d\n", addr);
-    move_to_black(addr);
-    parse_structure(addr);
-    printf("curr: %d\n", curr->address);
-    while (grey_ptr->points_to->address != black_ptr->points_to->address){
-        scan_node(grey_ptr->points_to->address);
-    }
-}
-
-void parse_structure(addr){
-    find_node(addr);
-    printf("node to parse: %d | %s | %d | %d | %s\n", curr->address, curr->type, curr->val1, curr->val2, curr->color);
-    if (curr->type == "IND"){
-		find_node(curr->val1);
-		if (curr->color == "white"){
-			find_node(addr);
-        	move_to_grey(curr->val1);
-		}else{printf("Already moved %d\n", curr->address);}
-    } else if (curr->type == "CONS"){
-		printf("Found a CONS object\n");
-		printf("Moving %d to grey\n", curr->val1);
-		find_node(curr->val1);
-		if (curr->color == "white"){
-			find_node(addr);
-        	move_to_grey(curr->val1);
-		}else{printf("Already moved %d\n", curr->address);}
-		find_node(addr);
-		printf("Moving %d to grey\n", curr->val2);
-		find_node(curr->val2);
-		if (curr->color == "white"){
-			find_node(addr);
-        	move_to_grey(curr->val2);
-		}else{printf("Already moved %d\n", curr->address);}
-    }
-}
-
-void take_out_trash(){
-	printf("Taking out the trash\n");
-	curr = head;
-	int i;
-	free_ptr->points_to = curr;
-	for (i=0; i<HEAP_SIZE; i++){
-		if (curr->color == "white"){
-			curr->address = -1;
-			curr->type = NULL;
-			curr->val1 = 0;
-			curr->val2 = 0;
-			curr->type = NULL;
-			curr->color = "ecru";
-		}
-		curr = curr->next;}
-	print_list();
-}
 
 int main(int argc, char** argv){
 	int roots[] = {21,0,3,12};
-	init_heap(HEAP_SIZE);	//parameter is total space in memory (# of links in LL)
+	//init_heap(HEAP_SIZE);	//parameter is total space in memory (# of links in LL)
+	//print_list();
+	new_init(HEAP_SIZE);
     //start_gc(roots);
 	return 0;
 }

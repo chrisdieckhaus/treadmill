@@ -102,12 +102,11 @@ void print_list(){
 	}
 }
 
-void start_gc(int roots[]){
+void start_gc(int roots[], int num_roots){
     int i;
-    for (i=0; i<NUM_ROOTS; i++){
+    for (i=0; i<num_roots; i++){
         move_to_grey(roots[i]);
     }
- //9
     scan_node(roots[0]);
     print_list();
 	print_pointers();
@@ -123,7 +122,7 @@ void find_node(int addr){
 		}else{
 			curr = curr->next;}}}
 
-void move_to_grey(addr){
+void move_to_grey(int addr){
 	find_node(addr); //set curr to the node we're looking for
 	if (white_ptr->points_to->address == curr->address){
 		white_ptr->points_to = curr->next;
@@ -141,7 +140,7 @@ void move_to_grey(addr){
 	print_pointers();
 }
 
-void move_to_black(addr){
+void move_to_black(int addr){
 	find_node(addr); //set curr to the node we're looking for
 	if (white_ptr->points_to->address == curr->address){
 		white_ptr->points_to = curr->next;
@@ -166,7 +165,7 @@ void move_to_black(addr){
 	print_pointers();
 }
 
-void scan_node(addr){
+void scan_node(int addr){
     find_node(addr);
     printf("Scanning node %d\n", addr);
     move_to_black(addr);
@@ -177,7 +176,7 @@ void scan_node(addr){
     }
 }
 
-void parse_structure(addr){
+void parse_structure(int addr){
     find_node(addr);
     printf("node to parse: %d | %s | %d | %d | %s\n", curr->address, curr->type, curr->val1, curr->val2, curr->color);
     if (curr->type == "IND"){
@@ -208,7 +207,6 @@ void take_out_trash(){
 	printf("Taking out the trash\n");
 	curr = head;
 	int i;
-	free_ptr->points_to = curr;
 	for (i=0; i<HEAP_SIZE; i++){
 		if (curr->color == "white"){
 			curr->address = -1;
@@ -218,14 +216,62 @@ void take_out_trash(){
 			curr->type = NULL;
 			curr->color = "ecru";
 		}
-		curr = curr->next;}
+		curr = curr->next;
+	}
+	free_ptr->points_to = curr;
 	print_list();
+	print_pointers();
+}
+
+void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int count){
+	if (check_memory(count)>=0){
+		curr = head;
+		while (curr->address != -1){
+			printf("%d | %s\n", curr->address, curr->type);
+			curr = curr->next;
+		}
+		print_pointers();
+		int j;
+		int offset = white_ptr->points_to->prev->address + 3;
+		for (j=0; j<count; j++){
+			curr->address = offset+(j*3);
+			curr->val1 = new_v1[j];
+			curr->val2 = new_v2[j];
+			curr->type = new_types[j];
+			curr->color = "white";
+			curr = curr->next;	
+		}
+		print_list();
+		start_gc(new_roots,1);
+	}else{
+		printf("Not enough space!\n");
+	}
+}
+
+int check_memory(int num){
+	curr = head;
+	int y;
+	int free_spaces = 0;
+	for (y=0; y<HEAP_SIZE; y++){
+		if (curr->address == -1){
+			free_spaces++;
+		}
+		curr = curr->next;
+	}
+	printf("Free spaces: %d\n", free_spaces);
+	return free_spaces - num;
 }
 
 int main(int argc, char** argv){
 	int roots[] = {21,0,3,12};
 	init_heap(HEAP_SIZE);	//parameter is total space in memory (# of links in LL)
-    start_gc(roots);
+    start_gc(roots, NUM_ROOTS);
+	int nr[] = {30};
+	int nv1[] = {4,3,6};
+	int nv2[] = {0,0,24};
+	char *nt[] = {"INT", "IND", "CONS"};
+	int x = sizeof(nv1)/sizeof(nv1[0]);
+	mutate(nr, nv1, nv2, nt, x);
 	return 0;
 }
 

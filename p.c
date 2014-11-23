@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #define HEAP_SIZE 10
-#define ALLOCATE 4
+#define ALLOCATE 6
 #define NUM_ROOTS 2
 //type: 0 = null, 1 = IND, 2 = INT
 
@@ -31,10 +31,10 @@ struct pointr *white_ptr = NULL;
 
 void init_heap(int length){
 	//add heap objects
-	int allocate = 4;
-	int val1s[ALLOCATE] = {4,6,10,3};
-	int val2s[ALLOCATE] = {0,0,0,0};
-	char *types[] = {"IND","CONS","INT","IND"};
+	int allocate = 6;
+	int val1s[ALLOCATE] = {3,2,0,0,9,0};
+	int val2s[ALLOCATE] = {0,0,9,9,15,0};
+	char *types[] = {"IND","INT","CONS","CONS","CONS","NULL"};
 	white_ptr = malloc(sizeof(struct pointr));
 	black_ptr = malloc(sizeof(struct pointr));
 	grey_ptr = malloc(sizeof(struct pointr));
@@ -68,7 +68,7 @@ void init_heap(int length){
 	for (j=0; j<allocate; j++){
 		curr->address = j*3;
 		curr->val1 = val1s[j];
-		curr->val2 = 0;
+		curr->val2 = val2s[j];
 		curr->type = types[j];
 		curr->color = "white";
 		curr = curr->next;	
@@ -103,13 +103,13 @@ void print_list(){
 }
 
 void start_gc(int roots[]){
-        int i;
-        for (i=0; i<NUM_ROOTS; i++){
-            move_to_grey(roots[i]);
-        }
-	 //9
-        scan_node(roots[0]);
-        print_list();
+    int i;
+    for (i=0; i<NUM_ROOTS; i++){
+        move_to_grey(roots[i]);
+    }
+ //9
+    scan_node(roots[0]);
+    print_list();
 	print_pointers();
 }
 
@@ -123,24 +123,36 @@ void find_node(int addr){
 			curr = curr->next;}}}
 
 void move_to_grey(addr){
-		find_node(addr); //set curr to the node we're looking for
-		if (white_ptr->points_to->address == curr->address){
-			white_ptr->points_to = curr->next;
-		}
+	find_node(addr); //set curr to the node we're looking for
+	if (white_ptr->points_to->address == curr->address){
+		white_ptr->points_to = curr->next;
+	} else {
 		curr->prev->next = curr->next;
 		curr->next->prev = curr->prev;
 		grey_ptr->points_to->prev->next = curr;
 		curr->prev = grey_ptr->points_to->prev;
 		curr->next = grey_ptr->points_to;
 		grey_ptr->points_to->prev = curr;
-		curr->color = "grey";
-		grey_ptr->points_to = curr;
+	}	
+	curr->color = "grey";
+	grey_ptr->points_to = curr;
 	print_list();
 	print_pointers();
 }
 
 void move_to_black(addr){
 	find_node(addr); //set curr to the node we're looking for
+	if (white_ptr->points_to->address == curr->address){
+		white_ptr->points_to = curr->next;
+		grey_ptr->points_to = curr->next;
+	}
+	if (grey_ptr->points_to->address == curr->address){
+		if (curr->next->color == "grey"){
+			grey_ptr->points_to = curr->next;
+		}else if (curr->prev->color == "grey"){
+			grey_ptr->points_to = curr->prev;
+		}		
+	}
 	curr->prev->next = curr->next;
 	curr->next->prev = curr->prev;
 	black_ptr->points_to->prev->next = curr;
@@ -162,7 +174,6 @@ void scan_node(addr){
     parse_structure(addr);
     printf("curr: %d\n", curr->address);
     while (grey_ptr->points_to->address != black_ptr->points_to->address){
-        printf("Grey: %d\nBlack: %d\n", grey_ptr->points_to->address, black_ptr->points_to->address);
         scan_node(grey_ptr->points_to->address);
     }
 }
@@ -171,15 +182,31 @@ void parse_structure(addr){
     find_node(addr);
     printf("node to parse: %d | %s | %d | %d | %s\n", curr->address, curr->type, curr->val1, curr->val2, curr->color);
     if (curr->type == "IND"){
-        move_to_grey(curr->val1);
+		find_node(curr->val1);
+		if (curr->color == "white"){
+			find_node(addr);
+        	move_to_grey(curr->val1);
+		}else{printf("Already moved %d\n", curr->address);}
     } else if (curr->type == "CONS"){
-        move_to_grey(curr->val1);
-        move_to_grey(curr->val2);
+		printf("Found a CONS object\n");
+		printf("Moving %d to grey\n", curr->val1);
+		find_node(curr->val1);
+		if (curr->color == "white"){
+			find_node(addr);
+        	move_to_grey(curr->val1);
+		}else{printf("Already moved %d\n", curr->address);}
+		find_node(addr);
+		printf("Moving %d to grey\n", curr->val2);
+		find_node(curr->val2);
+		if (curr->color == "white"){
+			find_node(addr);
+        	move_to_grey(curr->val2);
+		}else{printf("Already moved %d\n", curr->address);}
     }
 }
 
 int main(int argc, char** argv){
-	int roots[] = {9,6};
+	int roots[] = {3,6};
 	init_heap(10);	//parameter is total space in memory (# of links in LL)
         start_gc(roots);
 	return 0;

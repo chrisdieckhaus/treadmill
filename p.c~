@@ -1,9 +1,9 @@
 //This will be used for playing around with C and linked lists.#include "fs.h"
 #include <stdlib.h>
 #include <stdio.h>
-#define HEAP_SIZE 10
-#define ALLOCATE 6
-#define NUM_ROOTS 2
+#define HEAP_SIZE 15
+#define ALLOCATE 11
+#define NUM_ROOTS 4
 //type: 0 = null, 1 = IND, 2 = INT
 
 struct node {
@@ -30,11 +30,11 @@ struct pointr *free_ptr = NULL;
 struct pointr *white_ptr = NULL;
 
 void init_heap(int length){
+	printf("Init heap of size %d\n", HEAP_SIZE);
 	//add heap objects
-	int allocate = 6;
-	int val1s[ALLOCATE] = {3,2,0,0,9,0};
-	int val2s[ALLOCATE] = {0,0,9,9,15,0};
-	char *types[] = {"IND","INT","CONS","CONS","CONS","NULL"};
+	int val1s[ALLOCATE] = {0,0,0,18,6,9,0,9,4,0,15};
+	int val2s[ALLOCATE] = {0,0,21,21,7,3,0,3,0,0,0};
+	char *types[] = {"INT","NULL","CONS","CONS","CONS","CONS","IND","CONS","INT","NULL","IND"};
 	white_ptr = malloc(sizeof(struct pointr));
 	black_ptr = malloc(sizeof(struct pointr));
 	grey_ptr = malloc(sizeof(struct pointr));
@@ -65,7 +65,7 @@ void init_heap(int length){
 	head->prev = curr;
 	curr = head;
 	int j;
-	for (j=0; j<allocate; j++){
+	for (j=0; j<ALLOCATE; j++){
 		curr->address = j*3;
 		curr->val1 = val1s[j];
 		curr->val2 = val2s[j];
@@ -146,9 +146,6 @@ void move_to_black(addr){
 		white_ptr->points_to = curr->next;
 		grey_ptr->points_to = curr->next;
 	}
-	printf("GREY !!!!!!!!!!! %d\n", grey_ptr->points_to->address);
-	printf("CURR !!!!!!!!!!! %d\n", curr->address);
-	printf("NEXt !!!!!!!!!!! %d\n", curr->next->address);
 	if (grey_ptr->points_to->address == curr->address){
 		if (curr->next->color == "grey"){
 			grey_ptr->points_to = curr->next;
@@ -209,9 +206,9 @@ void parse_structure(addr){
 }
 
 int main(int argc, char** argv){
-	int roots[] = {3,6};
-	init_heap(10);	//parameter is total space in memory (# of links in LL)
-        start_gc(roots);
+	int roots[] = {21,0,3,12};
+	init_heap(HEAP_SIZE);	//parameter is total space in memory (# of links in LL)
+    start_gc(roots);
 	return 0;
 }
 

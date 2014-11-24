@@ -46,7 +46,7 @@ void init_heap(int length, int val1s[], int val2s[], char *types[]){
 	curr = malloc(sizeof(struct node));
 	curr = head;
 	int i;
-	for (i=1; i<(length-1); i++){
+	for (i=1; i<(length); i++){
 		struct node * ptr = malloc(sizeof(struct node));
 		ptr->address = i*3;
 		ptr->type = NULL;
@@ -93,7 +93,7 @@ void print_pointers(){
 void print_list(){
 	curr = head;
 	int i;
-	for (i=0; i<HEAP_SIZE+1; i++){
+	for (i=0; i<HEAP_SIZE; i++){
 		printf("%d \t| %s \t| %d \t| %d \t| %s\n", curr->address, curr->type, curr->val1, curr->val2, curr->color);
 		curr = curr->next;
 	}
@@ -167,7 +167,6 @@ void scan_node(int addr){
     printf("Scanning node %d\n", addr);
     move_to_black(addr);
     parse_structure(addr);
-    printf("curr: %d\n", curr->address);
     while (grey_ptr->points_to->address != black_ptr->points_to->address){
         scan_node(grey_ptr->points_to->address);
     }
@@ -175,28 +174,24 @@ void scan_node(int addr){
 
 void parse_structure(int addr){
     find_node(addr);
-    printf("node to parse: %d | %s | %d | %d | %s\n", curr->address, curr->type, curr->val1, curr->val2, curr->color);
     if (curr->type == "IND"){
 		find_node(curr->val1);
 		if (curr->color == "white"){
 			find_node(addr);
         	move_to_grey(curr->val1);
-		}else{printf("Already moved %d\n", curr->address);}
+		}
     } else if (curr->type == "CONS"){
-		printf("Found a CONS object\n");
-		printf("Moving %d to grey\n", curr->val1);
 		find_node(curr->val1);
 		if (curr->color == "white"){
 			find_node(addr);
         	move_to_grey(curr->val1);
-		}else{printf("Already moved %d\n", curr->address);}
+		}
 		find_node(addr);
-		printf("Moving %d to grey\n", curr->val2);
 		find_node(curr->val2);
 		if (curr->color == "white"){
 			find_node(addr);
         	move_to_grey(curr->val2);
-		}else{printf("Already moved %d\n", curr->address);}
+		}
     }
 }
 
@@ -227,7 +222,6 @@ void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int 
 	if (check_memory(count)>=count){
 		curr = head;
 		while (curr->color != "ecru"){
-			printf("%d | %s\n", curr->address, curr->type);
 			curr = curr->next;
 		}
 		int j;
@@ -245,17 +239,15 @@ void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int 
 		while (curr->color != "ecru"){
 			curr = curr->next;
 		}
-		printf("Free space starts here %d\n", curr->address);
 		int j;
-		for (j=0; j<check_memory(count); j++){  //something is wrong here
-			printf("v1 %d\n", new_v1[j]);
+		for (j=0; j<check_memory(count); j++){
 			curr->val1 = new_v1[j];
-			printf("currv1 %d\n", curr->val1);
 			curr->val2 = new_v2[j];
 			curr->type = new_types[j];
 			curr->color = "white";
 			curr = curr->next;	
 		}
+		int i;		
 	}
 	print_list();
 	printf("Starting mutation's GC\n");

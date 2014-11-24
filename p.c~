@@ -46,7 +46,7 @@ void init_heap(int length, int val1s[], int val2s[], char *types[]){
 	curr = malloc(sizeof(struct node));
 	curr = head;
 	int i;
-	for (i=1; i<(length-1); i++){
+	for (i=1; i<(length); i++){
 		struct node * ptr = malloc(sizeof(struct node));
 		ptr->address = i*3;
 		ptr->type = NULL;
@@ -93,7 +93,7 @@ void print_pointers(){
 void print_list(){
 	curr = head;
 	int i;
-	for (i=0; i<HEAP_SIZE+1; i++){
+	for (i=0; i<HEAP_SIZE; i++){
 		printf("%d \t| %s \t| %d \t| %d \t| %s\n", curr->address, curr->type, curr->val1, curr->val2, curr->color);
 		curr = curr->next;
 	}
@@ -247,7 +247,7 @@ void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int 
 		}
 		printf("Free space starts here %d\n", curr->address);
 		int j;
-		for (j=0; j<check_memory(count); j++){
+		for (j=0; j<check_memory(count); j++){  //something is wrong here
 			printf("v1 %d\n", new_v1[j]);
 			curr->val1 = new_v1[j];
 			printf("currv1 %d\n", curr->val1);
@@ -256,6 +256,13 @@ void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int 
 			curr->color = "white";
 			curr = curr->next;	
 		}
+		int i;
+		printf("START\n");		
+		for (i=0; i<HEAP_SIZE; i++){
+			printf("%d \t| %s \t| %d \t| %d \t| %s\n", curr->address, curr->type, curr->val1, curr->val2, curr->color);
+			curr = curr->next;
+		}
+		printf("DONE\n");
 	}
 	print_list();
 	printf("Starting mutation's GC\n");

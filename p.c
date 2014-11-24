@@ -100,10 +100,20 @@ void print_list(){
 }
 
 void start_gc(int roots[], int num_roots){
+	print_list();
     int i;
     for (i=0; i<num_roots; i++){
-        move_to_grey(roots[i]);
-    }
+		printf("Current root is %d\n", roots[i]);
+		find_node(roots[i]);
+		printf("Curr is %d\n", curr->address);
+		if (curr->type == "WEAK"){
+			if (has_other_ptrs(curr->address)>0){
+				move_to_grey(roots[i]);
+			}
+	    }else{
+			move_to_grey(roots[i]);
+		}
+	}
     scan_node(roots[0]);
     print_list();
 	print_pointers();
@@ -121,6 +131,9 @@ void find_node(int addr){
 
 void move_to_grey(int addr){
 	find_node(addr); //set curr to the node we're looking for
+	if (curr->type == "WEAK" && has_other_ptrs(curr->address == 0)){
+		return;
+	}
 	if (white_ptr->points_to->address == curr->address){
 		white_ptr->points_to = curr->next;
 	} else {
@@ -174,11 +187,23 @@ void scan_node(int addr){
 
 void parse_structure(int addr){
     find_node(addr);
+	printf("Parsing node %d curr is %d\n", addr, curr->address);
     if (curr->type == "IND"){
 		find_node(curr->val1);
 		if (curr->color == "white"){
 			find_node(addr);
         	move_to_grey(curr->val1);
+		}
+	} else if (curr->type == "WEAK"){
+		printf("Node %d is of type WEAK\n", curr->address);
+		find_node(curr->val1);
+		if (has_other_ptrs(curr->address)>0){
+			find_node(addr);			
+			find_node(curr->val1);
+			if (curr->color == "white"){
+				find_node(addr);
+		    	move_to_grey(curr->val1);
+			}
 		}
     } else if (curr->type == "CONS"){
 		find_node(curr->val1);
@@ -193,6 +218,33 @@ void parse_structure(int addr){
         	move_to_grey(curr->val2);
 		}
     }
+}
+
+int has_other_ptrs(int addr){
+	int ref_count = 0;
+	int i;
+	find_node(addr);
+	printf("addr is %d\n", addr);
+	int weak_ptr = curr->val1;
+	printf("Curr in has other ptrs is %d\n", curr->address);
+	for (i=0; i<HEAP_SIZE; i++){
+		if (curr->type == "IND"){
+			if (curr->val1 == weak_ptr){
+				ref_count++;
+			}
+		}else if (curr->type == "CONS"){
+			if (curr->val1 == weak_ptr){
+				ref_count++;
+			}
+			if (curr->val2 == weak_ptr){
+				ref_count++;
+			}
+		}
+		curr = curr->next;
+	}
+	printf("REF_COUNT %d\n", ref_count);
+	print_list();
+	return ref_count;
 }
 
 void take_out_trash(){
@@ -232,7 +284,6 @@ void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int 
 			curr->color = "white";
 			curr = curr->next;	
 		}
-		
 	}else{
 		printf("Not enough space! Only %d spaces free\n", check_memory(count));
 		curr = head;
@@ -246,8 +297,7 @@ void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int 
 			curr->type = new_types[j];
 			curr->color = "white";
 			curr = curr->next;	
-		}
-		int i;		
+		}		
 	}
 	print_list();
 	printf("Starting mutation's GC\n");
@@ -269,12 +319,12 @@ int check_memory(int num){
 
 int main(int argc, char** argv){
 	int roots[] = {21,0,3,12};
-	int v1[ALLOCATE] = {0,24,0,9,4,0,15};
-	int v2[ALLOCATE] = {0,0,21,3,0,0,0};
-	char *ntypes[] = {"INT","IND","CONS","CONS","CONS","CONS","IND","CONS","INT","NULL","IND"};
+	int v1[ALLOCATE] = {0,24,0,9,1,21,15,9,76,0,3};
+	int v2[ALLOCATE] = {0,0,21,3,0,0,0,12,0,0,0};
+	char *ntypes[] = {"INT","WEAK","CONS","CONS","BOOL","CONS","IND","CONS","INT","NULL","IND"};
 	init_heap(HEAP_SIZE, v1, v2, ntypes);	//parameter is total space in memory (# of links in LL)
     start_gc(roots, NUM_ROOTS);
-
+/*
 	int nr[] = {9};
 	int nv1[] = {4,3,6};
 	int nv2[] = {0,0,24};
@@ -292,13 +342,13 @@ int main(int argc, char** argv){
 	mutate(nr1, nv11, nv21, nt1, x, rc);
 
 	int nr2[] = {27};
-	int nv12[] = {24,18,3,0,0,12,0};
+	int nv12[] = {1,18,3,0,0,12,0};
 	int nv22[] = {0,0,12,0,0,12,0};
-	char *nt2[] = {"INT", "IND", "CONS","INT", "IND", "CONS","NULL"};
+	char *nt2[] = {"BOOL", "WEAK", "CONS","INT", "IND", "CONS","NULL"};
 	x = sizeof(nv12)/sizeof(nv12[0]);
 	rc = sizeof(nr2)/sizeof(nr2[0]);
 	mutate(nr2, nv12, nv22, nt2, x,rc);
-
+*/
 	return 0;
 }
 

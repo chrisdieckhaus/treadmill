@@ -131,7 +131,7 @@ void find_node(int addr){
 
 void move_to_grey(int addr){
 	find_node(addr); //set curr to the node we're looking for
-	if (curr->type == "WEAK" && has_other_ptrs(curr->address == 0){
+	if (curr->type == "WEAK" && has_other_ptrs(curr->address == 0)){
 		return;
 	}
 	if (white_ptr->points_to->address == curr->address){
@@ -228,7 +228,7 @@ int has_other_ptrs(int addr){
 	int weak_ptr = curr->val1;
 	printf("Curr in has other ptrs is %d\n", curr->address);
 	for (i=0; i<HEAP_SIZE; i++){
-		if (curr->type == "IND"){
+		if (curr->type == "IND" || curr->type == "STRONG"){
 			if (curr->val1 == weak_ptr){
 				ref_count++;
 			}
@@ -319,20 +319,20 @@ int check_memory(int num){
 
 int main(int argc, char** argv){
 	int roots[] = {21,0,3,12};
-	int v1[ALLOCATE] = {0,24,0,9,1,21,15,9,76,0,3};
-	int v2[ALLOCATE] = {0,0,21,3,0,0,0,12,0,0,0};
-	char *ntypes[] = {"INT","WEAK","CONS","CONS","BOOL","CONS","IND","CONS","INT","NULL","IND"};
+	int v1[ALLOCATE] = {0,0,0,18,6,9,0,9,4,0,15};
+	int v2[ALLOCATE] = {0,0,21,21,9,3,0,3,0,0,0};
+	char *ntypes[] = {"INT","NULL","CONS","CONS","CONS","CONS","IND","CONS","INT","NULL","IND"};
 	init_heap(HEAP_SIZE, v1, v2, ntypes);	//parameter is total space in memory (# of links in LL)
     start_gc(roots, NUM_ROOTS);
-/*
-	int nr[] = {9};
+
+	int nr[] = {6,18};
 	int nv1[] = {4,3,6};
 	int nv2[] = {0,0,24};
 	char *nt[] = {"INT", "IND", "CONS"};
 	int x = sizeof(nv1)/sizeof(nv1[0]);
 	int rc = sizeof(nr)/sizeof(nr[0]);
 	mutate(nr, nv1, nv2, nt, x,rc);
-
+/*
 	int nr1[] = {15};
 	int nv11[] = {24,18,3};
 	int nv21[] = {0,0,12};
@@ -340,7 +340,7 @@ int main(int argc, char** argv){
 	x = sizeof(nv11)/sizeof(nv11[0]);
 	rc = sizeof(nr1)/sizeof(nr1[0]);
 	mutate(nr1, nv11, nv21, nt1, x, rc);
-
+*/
 	int nr2[] = {27};
 	int nv12[] = {1,18,3,0,0,12,0};
 	int nv22[] = {0,0,12,0,0,12,0};
@@ -348,7 +348,7 @@ int main(int argc, char** argv){
 	x = sizeof(nv12)/sizeof(nv12[0]);
 	rc = sizeof(nr2)/sizeof(nr2[0]);
 	mutate(nr2, nv12, nv22, nt2, x,rc);
-*/
+
 	return 0;
 }
 

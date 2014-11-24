@@ -188,7 +188,7 @@ void scan_node(int addr){
 void parse_structure(int addr){
     find_node(addr);
 	printf("Parsing node %d curr is %d\n", addr, curr->address);
-    if (curr->type == "IND" || curr->type == "STRONG"){
+    if (curr->type == "IND" || curr->type == "SOFT"){
 		find_node(curr->val1);
 		if (curr->color == "white"){
 			find_node(addr);
@@ -228,7 +228,7 @@ int has_other_ptrs(int addr){
 	int weak_ptr = curr->val1;
 	printf("Curr in has other ptrs is %d\n", curr->address);
 	for (i=0; i<HEAP_SIZE; i++){
-		if (curr->type == "IND" || curr->type == "STRONG"){
+		if (curr->type == "IND" || curr->type == "SOFT"){
 			if (curr->val1 == weak_ptr){
 				ref_count++;
 			}
@@ -245,6 +245,21 @@ int has_other_ptrs(int addr){
 	printf("REF_COUNT %d\n", ref_count);
 	print_list();
 	return ref_count;
+}
+
+int soft_has_ptrs(int addr){
+	return 1;
+}
+
+void reclaim_soft_objects(){
+	curr = head;
+	int i;
+	for (i=0; i<HEAP_SIZE; i++){
+		if (curr->type == "SOFT"){
+			printf("soft at %d\n", curr->address);
+		}
+	curr = curr->next;
+	}
 }
 
 void take_out_trash(){
@@ -286,6 +301,7 @@ void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int 
 		}
 	}else{
 		printf("Not enough space! Only %d spaces free\n", check_memory(count));
+		reclaim_soft_objects();
 		curr = head;
 		while (curr->color != "ecru"){
 			curr = curr->next;
@@ -319,12 +335,13 @@ int check_memory(int num){
 
 int main(int argc, char** argv){
 	int roots[] = {21,0,3,12};
-	int v1[ALLOCATE] = {0,0,0,18,6,9,0,9,4,0,15};
+	int v1[ALLOCATE] = {6,0,0,18,6,9,0,9,4,0,15};
 	int v2[ALLOCATE] = {0,0,21,21,9,3,0,3,0,0,0};
-	char *ntypes[] = {"INT","NULL","CONS","CONS","CONS","CONS","IND","CONS","INT","NULL","IND"};
+	char *ntypes[] = {"SOFT","NULL","CONS","CONS","CONS","CONS","SOFT","CONS","INT","NULL","IND"};
 	init_heap(HEAP_SIZE, v1, v2, ntypes);	//parameter is total space in memory (# of links in LL)
     start_gc(roots, NUM_ROOTS);
-
+	reclaim_soft_objects();
+/*
 	int nr[] = {6,18};
 	int nv1[] = {4,3,6};
 	int nv2[] = {0,0,24};
@@ -332,7 +349,7 @@ int main(int argc, char** argv){
 	int x = sizeof(nv1)/sizeof(nv1[0]);
 	int rc = sizeof(nr)/sizeof(nr[0]);
 	mutate(nr, nv1, nv2, nt, x,rc);
-/*
+
 	int nr1[] = {15};
 	int nv11[] = {24,18,3};
 	int nv21[] = {0,0,12};
@@ -340,7 +357,7 @@ int main(int argc, char** argv){
 	x = sizeof(nv11)/sizeof(nv11[0]);
 	rc = sizeof(nr1)/sizeof(nr1[0]);
 	mutate(nr1, nv11, nv21, nt1, x, rc);
-*/
+
 	int nr2[] = {27};
 	int nv12[] = {1,18,3,0,0,12,0};
 	int nv22[] = {0,0,12,0,0,12,0};
@@ -348,7 +365,7 @@ int main(int argc, char** argv){
 	x = sizeof(nv12)/sizeof(nv12[0]);
 	rc = sizeof(nr2)/sizeof(nr2[0]);
 	mutate(nr2, nv12, nv22, nt2, x,rc);
-
+*/
 	return 0;
 }
 

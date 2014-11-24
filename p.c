@@ -223,9 +223,10 @@ void take_out_trash(){
 	print_pointers();
 }
 
-void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int count){
-	if (check_memory(count)>=0){
+void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int count, int root_count){
+	if (check_memory(count)>=count){
 		curr = head;
+		printf("Roots length %d\n", sizeof(new_roots));
 		while (curr->color != "ecru"){
 			printf("%d | %s\n", curr->address, curr->type);
 			curr = curr->next;
@@ -240,9 +241,9 @@ void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int 
 			curr = curr->next;	
 		}
 		print_list();
-		//start_gc(new_roots,1);
+		start_gc(new_roots,root_count);
 	}else{
-		printf("Not enough space!\n");
+		printf("Not enough space! Only %d spaces free\n", check_memory(count));
 	}
 }
 
@@ -257,7 +258,7 @@ int check_memory(int num){
 		curr = curr->next;
 	}
 	printf("Free spaces: %d\n", free_spaces);
-	return free_spaces - num;
+	return free_spaces;
 }
 
 int main(int argc, char** argv){
@@ -268,19 +269,29 @@ int main(int argc, char** argv){
 	init_heap(HEAP_SIZE, v1, v2, ntypes);	//parameter is total space in memory (# of links in LL)
     start_gc(roots, NUM_ROOTS);
 
-	int nr[] = {30};
+	int nr[] = {9};
 	int nv1[] = {4,3,6};
 	int nv2[] = {0,0,24};
 	char *nt[] = {"INT", "IND", "CONS"};
 	int x = sizeof(nv1)/sizeof(nv1[0]);
-	mutate(nr, nv1, nv2, nt, x);
+	int rc = sizeof(nr)/sizeof(nr[0]);
+	mutate(nr, nv1, nv2, nt, x,rc);
 
-	int nr1[] = {3};
-	int nv11[] = {24,0,3};
+	int nr1[] = {15};
+	int nv11[] = {24,18,3};
 	int nv21[] = {0,0,12};
 	char *nt1[] = {"INT", "IND", "CONS"};
 	x = sizeof(nv11)/sizeof(nv11[0]);
-	//mutate(nr1, nv11, nv21, nt1, x);
+	rc = sizeof(nr1)/sizeof(nr1[0]);
+	mutate(nr1, nv11, nv21, nt1, x, rc);
+
+	int nr2[] = {27};
+	int nv12[] = {24,18,3,0,0,12,0};
+	int nv22[] = {0,0,12,0,0,12,0};
+	char *nt2[] = {"INT", "IND", "CONS","INT", "IND", "CONS","NULL"};
+	x = sizeof(nv12)/sizeof(nv12[0]);
+	rc = sizeof(nr2)/sizeof(nr2[0]);
+	mutate(nr2, nv12, nv22, nt2, x,rc);
 
 	return 0;
 }

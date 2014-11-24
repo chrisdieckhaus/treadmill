@@ -46,9 +46,9 @@ void init_heap(int length, int val1s[], int val2s[], char *types[]){
 	curr = malloc(sizeof(struct node));
 	curr = head;
 	int i;
-	for (i=0; i<length; i++){
+	for (i=1; i<(length-1); i++){
 		struct node * ptr = malloc(sizeof(struct node));
-		ptr->address = -1;
+		ptr->address = i*3;
 		ptr->type = NULL;
 		ptr->val1 = 0;
 		ptr->val2 = 0;
@@ -64,7 +64,6 @@ void init_heap(int length, int val1s[], int val2s[], char *types[]){
 	curr = head;
 	int j;
 	for (j=0; j<ALLOCATE; j++){
-		curr->address = j*3;
 		curr->val1 = val1s[j];
 		curr->val2 = val2s[j];
 		curr->type = types[j];
@@ -95,7 +94,7 @@ void print_list(){
 	curr = head;
 	int i;
 	for (i=0; i<HEAP_SIZE+1; i++){
-		printf("%d | %s | %d | %d | %s\n", curr->address, curr->type, curr->val1, curr->val2, curr->color);
+		printf("%d \t| %s \t| %d \t| %d \t| %s\n", curr->address, curr->type, curr->val1, curr->val2, curr->color);
 		curr = curr->next;
 	}
 }
@@ -207,13 +206,16 @@ void take_out_trash(){
 	int i;
 	for (i=0; i<HEAP_SIZE; i++){
 		if (curr->color == "white"){
-			curr->address = -1;
-			curr->type = NULL;
+			printf("Removing %d from heap\n", curr->address);
+			curr->type = 0;
 			curr->val1 = 0;
 			curr->val2 = 0;
-			curr->type = NULL;
 			curr->color = "ecru";
 		}
+		curr = curr->next;
+	}
+	curr = head;
+	while (curr->color != "ecru"){
 		curr = curr->next;
 	}
 	free_ptr->points_to = curr;
@@ -224,15 +226,13 @@ void take_out_trash(){
 void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int count){
 	if (check_memory(count)>=0){
 		curr = head;
-		while (curr->address != -1){
+		while (curr->color != "ecru"){
 			printf("%d | %s\n", curr->address, curr->type);
 			curr = curr->next;
 		}
 		print_pointers();
 		int j;
-		int offset = white_ptr->points_to->prev->address + 3;
 		for (j=0; j<count; j++){
-			curr->address = offset+(j*3);
 			curr->val1 = new_v1[j];
 			curr->val2 = new_v2[j];
 			curr->type = new_types[j];
@@ -240,7 +240,7 @@ void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int 
 			curr = curr->next;	
 		}
 		print_list();
-		start_gc(new_roots,1);
+		//start_gc(new_roots,1);
 	}else{
 		printf("Not enough space!\n");
 	}
@@ -262,9 +262,9 @@ int check_memory(int num){
 
 int main(int argc, char** argv){
 	int roots[] = {21,0,3,12};
-	int v1[ALLOCATE] = {0,0,0,9,4,0,15};
+	int v1[ALLOCATE] = {0,24,0,9,4,0,15};
 	int v2[ALLOCATE] = {0,0,21,3,0,0,0};
-	char *ntypes[] = {"INT","NULL","CONS","CONS","CONS","CONS","IND","CONS","INT","NULL","IND"};
+	char *ntypes[] = {"INT","IND","CONS","CONS","CONS","CONS","IND","CONS","INT","NULL","IND"};
 	init_heap(HEAP_SIZE, v1, v2, ntypes);	//parameter is total space in memory (# of links in LL)
     start_gc(roots, NUM_ROOTS);
 
@@ -274,6 +274,13 @@ int main(int argc, char** argv){
 	char *nt[] = {"INT", "IND", "CONS"};
 	int x = sizeof(nv1)/sizeof(nv1[0]);
 	mutate(nr, nv1, nv2, nt, x);
+
+	int nr1[] = {3};
+	int nv11[] = {24,0,3};
+	int nv21[] = {0,0,12};
+	char *nt1[] = {"INT", "IND", "CONS"};
+	x = sizeof(nv11)/sizeof(nv11[0]);
+	//mutate(nr1, nv11, nv21, nt1, x);
 
 	return 0;
 }

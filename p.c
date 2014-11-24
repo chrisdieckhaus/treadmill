@@ -226,12 +226,10 @@ void take_out_trash(){
 void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int count, int root_count){
 	if (check_memory(count)>=count){
 		curr = head;
-		printf("Roots length %d\n", sizeof(new_roots));
 		while (curr->color != "ecru"){
 			printf("%d | %s\n", curr->address, curr->type);
 			curr = curr->next;
 		}
-		print_pointers();
 		int j;
 		for (j=0; j<count; j++){
 			curr->val1 = new_v1[j];
@@ -240,11 +238,28 @@ void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int 
 			curr->color = "white";
 			curr = curr->next;	
 		}
-		print_list();
-		start_gc(new_roots,root_count);
+		
 	}else{
 		printf("Not enough space! Only %d spaces free\n", check_memory(count));
+		curr = head;
+		while (curr->color != "ecru"){
+			curr = curr->next;
+		}
+		printf("Free space starts here %d\n", curr->address);
+		int j;
+		for (j=0; j<check_memory(count); j++){  //something is wrong here
+			printf("v1 %d\n", new_v1[j]);
+			curr->val1 = new_v1[j];
+			printf("currv1 %d\n", curr->val1);
+			curr->val2 = new_v2[j];
+			curr->type = new_types[j];
+			curr->color = "white";
+			curr = curr->next;	
+		}
 	}
+	print_list();
+	printf("Starting mutation's GC\n");
+	start_gc(new_roots,root_count);
 }
 
 int check_memory(int num){
@@ -257,7 +272,6 @@ int check_memory(int num){
 		}
 		curr = curr->next;
 	}
-	printf("Free spaces: %d\n", free_spaces);
 	return free_spaces;
 }
 

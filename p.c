@@ -268,20 +268,46 @@ int check_memory(int num){
 	return free_spaces;
 }
 
+//takes address of WEAK node and returns number of other nodes that also point to its val1
+int has_references(int addr){
+	int ref_count = 0;
+	find_node(addr); // this is the node of the WEAK pointer we're checking
+	int ptr_to_find = curr->val1;  //this is its val. need to see if anything else points to it.
+	int i;
+	curr = curr->next; //dont want to count the node we're checking against
+	for (i=0; i<HEAP_SIZE-1; i++){
+		if ((curr->type == "IND") || (curr->type == "WEAK") || (curr->type == "SOFT")){
+			if (curr->val1 == ptr_to_find){
+				ref_count++;
+			}
+		}else if (curr->type == "CONS"){
+			if ((curr->val1 == ptr_to_find) || (curr->val2 == ptr_to_find)){
+				ref_count++;
+			}
+		}		
+		curr = curr->next;
+	}
+
+	printf("ref_count: %d\n", ref_count);
+	return ref_count;
+}
+
 int main(int argc, char** argv){
 	int roots[] = {21,0,3,12};
-	int v1[ALLOCATE] = {6,0,0,18,6,9,0,9,4,0,15};
-	int v2[ALLOCATE] = {0,0,21,21,9,3,0,0,0,0,0};
-	char *ntypes[] = {"SOFT","NULL","IND","CONS","CONS","CONS","SOFT","CONS","INT","NULL","IND"};
+	int v1[ALLOCATE] = {24,0,0,18,6,9,0,9,0,0,15};
+	int v2[ALLOCATE] = {0,0,0,21,9,3,0,0,0,0,0};
+	char *ntypes[] = {"SOFT","NULL","IND","CONS","CONS","CONS","SOFT","CONS","WEAK","NULL","IND"};
 	init_heap(HEAP_SIZE, v1, v2, ntypes);	//parameter is total space in memory (# of links in LL)
     start_gc(roots, NUM_ROOTS);
+	has_references(24);
+	int x,rc;
 /*
 	int nr[] = {6,18};
 	int nv1[] = {4,3,6};
 	int nv2[] = {0,0,24};
 	char *nt[] = {"INT", "IND", "CONS"};
-	int x = sizeof(nv1)/sizeof(nv1[0]);
-	int rc = sizeof(nr)/sizeof(nr[0]);
+	x = sizeof(nv1)/sizeof(nv1[0]);
+	rc = sizeof(nr)/sizeof(nr[0]);
 	mutate(nr, nv1, nv2, nt, x,rc);
 
 	int nr1[] = {15};
@@ -295,7 +321,7 @@ int main(int argc, char** argv){
 	int nr2[] = {27};
 	int nv12[] = {1,18,3,0,0,12,0};
 	int nv22[] = {0,0,12,0,0,12,0};
-	char *nt2[] = {"BOOL", "WEAK", "CONS","INT", "IND", "CONS","NULL"};
+	char *nt2[] = {"BOOL", "IND", "CONS","INT", "IND", "CONS","NULL"};
 	x = sizeof(nv12)/sizeof(nv12[0]);
 	rc = sizeof(nr2)/sizeof(nr2[0]);
 	mutate(nr2, nv12, nv22, nt2, x,rc);

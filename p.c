@@ -111,6 +111,7 @@ void start_gc(int roots[], int num_roots){
     print_list();
 	print_pointers();
 	take_out_trash();
+	reset_heap();
 }
 
 void find_node(int addr){
@@ -228,6 +229,24 @@ void take_out_trash(){
 	print_pointers();
 }
 
+void reset_heap(){
+	curr = head;
+	int i;
+	for (i=0; i<HEAP_SIZE; i++){
+		if (curr->color == "black"){
+			curr->color = "white";
+		}
+		curr = curr->next;
+	}
+	curr = free_ptr->points_to;
+	while (curr->color == "ecru"){
+		curr = curr->next;
+	}
+	white_ptr->points_to = curr;
+	print_list();
+	print_pointers();
+}
+
 void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int count, int root_count){
 	if (check_memory(count)>=count){
 		curr = head;
@@ -251,7 +270,6 @@ void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int 
 		}
 		int j;
 		for (j=0; j<len; j++){
-			printf("hi\n");
 			curr->val1 = new_v1[j];
 			printf("%d %d \n", curr->val1, new_v1[j]);
 			curr->val2 = new_v2[j];
@@ -310,6 +328,7 @@ int main(int argc, char** argv){
 	init_heap(HEAP_SIZE, v1, v2, ntypes);	//parameter is total space in memory (# of links in LL)
     start_gc(roots, NUM_ROOTS);
 	int x,rc;
+/*
 	printf("-----------------------------------------\n");
 	int nr[] = {6,18};
 	int nv1[] = {4,3,6};
@@ -334,7 +353,7 @@ int main(int argc, char** argv){
 	x = sizeof(nv12)/sizeof(nv12[0]);
 	rc = sizeof(nr2)/sizeof(nr2[0]);
 	mutate(nr2, nv12, nv22, nt2, x,rc);
-
+*/
 	return 0;
 }
 

@@ -1,9 +1,9 @@
 //This will be used for playing around with C and linked lists.#include "fs.h"
 #include <stdlib.h>
 #include <stdio.h>
-#define HEAP_SIZE 15 	//how many total memory spots in linked list?
+#define HEAP_SIZE 100 	//how many total memory spots in linked list?
 #define ALLOCATE 11		//how many objects in heap?
-#define NUM_ROOTS 4		//how many roots?
+#define NUM_ROOTS 1		//how many roots?
 //type: 0 = null, 1 = IND, 2 = INT
 
 struct node {
@@ -30,7 +30,6 @@ struct pointr *free_ptr = NULL;
 struct pointr *white_ptr = NULL;
 
 void init_heap(int length, int val1s[], int val2s[], char *types[]){
-	printf("Init heap of size %d\n", HEAP_SIZE);
 	//add heap objects
 	
 	white_ptr = malloc(sizeof(struct pointr));
@@ -100,16 +99,12 @@ void print_list(){
 }
 
 void start_gc(int roots[], int num_roots){
-	print_list();
     int i;
     for (i=0; i<num_roots; i++){
-		printf("Current root is %d\n", roots[i]);
 		find_node(roots[i]);
 		move_to_grey(roots[i]);
 	}
     scan_node(roots[0]);
-    print_list();
-	print_pointers();
 	take_out_trash();
 	reset_heap();
 }
@@ -142,8 +137,6 @@ void move_to_grey(int addr){
 	}	
 	curr->color = "grey";
 	grey_ptr->points_to = curr;
-	print_list();
-	print_pointers();
 }
 
 void move_to_black(int addr){
@@ -167,13 +160,10 @@ void move_to_black(int addr){
 	black_ptr->points_to->prev = curr;
 	curr->color = "black";
 	black_ptr->points_to = curr;
-	print_list();
-	print_pointers();
 }
 
 void scan_node(int addr){
     find_node(addr);
-    printf("Scanning node %d\n", addr);
     move_to_black(addr);
     parse_structure(addr);
     while (grey_ptr->points_to->address != black_ptr->points_to->address){
@@ -205,12 +195,10 @@ void parse_structure(int addr){
 }
 
 void take_out_trash(){
-	printf("Taking out the trash\n");
 	curr = head;
 	int i;
 	for (i=0; i<HEAP_SIZE; i++){
 		if (curr->color == "white"){
-			printf("Removing %d from heap\n", curr->address);
 			curr->type = 0;
 			curr->val1 = 0;
 			curr->val2 = 0;
@@ -223,8 +211,6 @@ void take_out_trash(){
 		curr = curr->next;
 	}
 	free_ptr->points_to = curr;
-	print_list();
-	print_pointers();
 }
 
 void reset_heap(){
@@ -243,8 +229,6 @@ void reset_heap(){
 	white_ptr->points_to = curr;
 	grey_ptr->points_to = curr;
 	black_ptr->points_to = curr;
-	print_list();
-	print_pointers();
 }
 
 void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int count, int root_count){
@@ -262,7 +246,6 @@ void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int 
 			curr = curr->next;	
 		}
 	}else{
-		printf("Not enough space! Only %d spaces free\n", check_memory(count));
 		int len = check_memory(count);
 		curr = head;
 		while (curr->color != "ecru"){
@@ -271,15 +254,12 @@ void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int 
 		int j;
 		for (j=0; j<len; j++){
 			curr->val1 = new_v1[j];
-			printf("%d %d \n", curr->val1, new_v1[j]);
 			curr->val2 = new_v2[j];
 			curr->type = new_types[j];
 			curr->color = "white";
 			curr = curr->next;	
 		}		
 	}
-	print_list();
-	printf("Starting mutation's GC\n");
 	start_gc(new_roots,root_count);
 }
 
@@ -315,8 +295,6 @@ int has_references(int addr){
 		}		
 		curr = curr->next;
 	}
-
-	printf("ref_count: %d\n", ref_count);
 	return ref_count;
 }
 
@@ -325,15 +303,20 @@ int main(int argc, char** argv){
 	int v1[ALLOCATE] = {21,4,0,18,6,9,0,9,27,0,15};
 	int v2[ALLOCATE] = {0,0,0,21,24,3,0,0,0,0,0};
 	char *ntypes[] = {"SOFT","VAR","IND","TUP","TUP","CALL","SOFT","TUP","WEAK","NULL","IND"};
+	
+        
+
         int i;
         time_t start = time(0);
-        for (i=0; i<1000; i++){
+        printf("Start\n");
+        for (i=0; i<1000000; i++){
             init_heap(HEAP_SIZE, v1, v2, ntypes);
             start_gc(roots, NUM_ROOTS);
         }
         time_t end = time(0);
         int total = end - start;
         printf("Time: %d\n", total);
+        return 0;
 	/*
 	int x,rc;
 
@@ -364,7 +347,7 @@ int main(int argc, char** argv){
 	rc = sizeof(nr2)/sizeof(nr2[0]);
 	mutate(nr2, nv12, nv22, nt2, x,rc);
         */
-	return 0;
+	
 }
 
 

@@ -1,7 +1,7 @@
 //This will be used for playing around with C and linked lists.#include "fs.h"
 #include <stdlib.h>
 #include <stdio.h>
-#define HEAP_SIZE 300 	//how many total memory spots in linked list?
+#define HEAP_SIZE 500 	//how many total memory spots in linked list?
 #define ALLOCATE 11		//how many objects in heap?
 #define NUM_ROOTS 2		//how many roots?
 //type: 0 = null, 1 = IND, 2 = INT

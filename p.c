@@ -263,6 +263,7 @@ void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int 
 		}
 	}else{
 		printf("Not enough space! Only %d spaces free\n", check_memory(count));
+		clear_soft();
 		int len = check_memory(count);
 		curr = head;
 		while (curr->color != "ecru"){
@@ -320,21 +321,44 @@ int has_references(int addr){
 	return ref_count;
 }
 
+void clear_soft(){
+	curr = head;
+	int i;
+	for (i=0; i<HEAP_SIZE; i++){
+		if (curr->type == "SOFT" && has_references(curr->address)==0){
+			curr->type = NULL;
+			curr->val1 = 0;
+			curr->val2 = 0;
+			curr->color = "ecru";
+			if (free_ptr->points_to->color != "ecru"){		//there are no free nodes
+				free_ptr->points_to = curr;
+				black_ptr->points_to = curr->next;
+				white_ptr->points_to = curr->next;
+				grey_ptr->points_to = curr->next;				
+			}else{
+				curr->prev->next = curr->next;
+				curr->next->prev = curr->prev;
+				white_ptr->points_to->prev->next = curr;
+				curr->prev = white_ptr->points_to->prev;
+				curr->next = white_ptr->points_to;
+				white_ptr->points_to->prev = curr;
+			}
+		}
+	curr = curr->next;
+	}
+	print_list();
+	print_pointers();
+}
+
 int main(int argc, char** argv){
 	int roots[] = {21,0,3,12};
-	int v1[ALLOCATE] = {21,4,0,18,6,9,0,9,27,0,15};
+	int v1[ALLOCATE] = {21,4,0,18,6,9,12,9,27,0,15};
 	int v2[ALLOCATE] = {0,0,0,21,24,3,0,0,0,0,0};
-	char *ntypes[] = {"SOFT","VAR","IND","TUP","TUP","CALL","SOFT","TUP","WEAK","NULL","IND"};
-        int i;
-        time_t start = time(0);
-        for (i=0; i<1000; i++){
-            init_heap(HEAP_SIZE, v1, v2, ntypes);
-            start_gc(roots, NUM_ROOTS);
-        }
-        time_t end = time(0);
-        int total = end - start;
-        printf("Time: %d\n", total);
-	/*
+	char *ntypes[] = {"SOFT","VAR","IND","TUP","TUP","CALL","SOFT","TUP","SOFT","NULL","IND"};
+	
+	init_heap(HEAP_SIZE, v1, v2, ntypes);	
+	start_gc(roots, NUM_ROOTS);
+	
 	int x,rc;
 
 	printf("-----------------------------------------\n");
@@ -363,7 +387,7 @@ int main(int argc, char** argv){
 	x = sizeof(nv12)/sizeof(nv12[0]);
 	rc = sizeof(nr2)/sizeof(nr2[0]);
 	mutate(nr2, nv12, nv22, nt2, x,rc);
-        */
+        
 	return 0;
 }
 

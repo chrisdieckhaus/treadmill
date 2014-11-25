@@ -1,7 +1,7 @@
 //This will be used for playing around with C and linked lists.#include "fs.h"
 #include <stdlib.h>
 #include <stdio.h>
-#define HEAP_SIZE 500 	//how many total memory spots in linked list?
+#define HEAP_SIZE 1000 	//how many total memory spots in linked list?
 #define ALLOCATE 11		//how many objects in heap?
 #define NUM_ROOTS 2		//how many roots?
 //type: 0 = null, 1 = IND, 2 = INT
@@ -306,7 +306,7 @@ int main(int argc, char** argv){
     int i;
     time_t start = time(0);
     printf("Start\n");
-    for (i=0; i<1000000; i++){
+    for (i=0; i<100000; i++){
         init_heap(HEAP_SIZE, v1, v2, ntypes);
         start_gc(roots, 4);
     }

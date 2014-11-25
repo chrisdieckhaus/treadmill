@@ -124,6 +124,13 @@ void find_node(int addr){
 
 void move_to_grey(int addr){ 
 	find_node(addr); 
+	if (curr->type == "WEAK"){
+		printf("I'm weak at %d\n", curr->address);
+		if (has_references(curr->address) == 0){
+			printf("and have no references", curr->address);
+			return;
+		}
+	}
 	if (white_ptr->points_to->address == curr->address){
 		white_ptr->points_to = curr->next;
 	} else {
@@ -237,18 +244,25 @@ void mutate(int new_roots[], int new_v1[], int new_v2[], char *new_types[], int 
 		}
 	}else{
 		printf("Not enough space! Only %d spaces free\n", check_memory(count));
+		int len = check_memory(count);
 		curr = head;
 		while (curr->color != "ecru"){
 			curr = curr->next;
 		}
+		printf("CURR: %d\n", curr->address);
 		int j;
-		for (j=0; j<check_memory(count); j++){
+		
+		for (j=0; j<len; j++){
+			printf("hi\n");
 			curr->val1 = new_v1[j];
+			printf("%d %d \n", curr->val1, new_v1[j]);
 			curr->val2 = new_v2[j];
 			curr->type = new_types[j];
 			curr->color = "white";
 			curr = curr->next;	
-		}		
+		}	
+		find_node(27);
+		printf("curr: %d\n", curr->type);	
 	}
 	print_list();
 	printf("Starting mutation's GC\n");
@@ -271,24 +285,17 @@ int check_memory(int num){
 //takes address of WEAK node and returns number of other nodes that also point to its val1
 int has_references(int addr){
 	int ref_count = 0;
-	find_node(addr);
-	printf("WEAK node: %d\n", curr->address);
-	int ptr_to_find = curr->val1;
-	printf("ptr_to_find: %d\n", ptr_to_find);
+	find_node(addr); // this is the node of the WEAK pointer we're checking
+	int ptr_to_find = curr->val1;  //this is its val. need to see if anything else points to it.
 	int i;
 	curr = curr->next; //dont want to count the node we're checking against
 	for (i=0; i<HEAP_SIZE-1; i++){
-		printf("%d \t| %d\n", curr->address, curr->val1);
 		if ((curr->type == "IND") || (curr->type == "WEAK") || (curr->type == "SOFT")){
-			printf("I'm %s | %d!\n", curr->type, curr->val1);
 			if (curr->val1 == ptr_to_find){
-				printf("A reference!\n");
 				ref_count++;
 			}
 		}else if (curr->type == "CONS"){
-			printf("I'm %s | %d \t| %d!\n", curr->type, curr->val1, curr->val2);
 			if ((curr->val1 == ptr_to_find) || (curr->val2 == ptr_to_find)){
-				printf("A reference!\n");
 				ref_count++;
 			}
 		}		
@@ -301,30 +308,29 @@ int has_references(int addr){
 
 int main(int argc, char** argv){
 	int roots[] = {21,0,3,12};
-	int v1[ALLOCATE] = {24,0,0,18,6,9,0,9,0,0,15};
+	int v1[ALLOCATE] = {21,0,0,18,6,9,0,9,0,0,15};
 	int v2[ALLOCATE] = {0,0,0,21,9,3,0,0,0,0,0};
 	char *ntypes[] = {"SOFT","NULL","IND","CONS","CONS","CONS","SOFT","CONS","WEAK","NULL","IND"};
 	init_heap(HEAP_SIZE, v1, v2, ntypes);	//parameter is total space in memory (# of links in LL)
     start_gc(roots, NUM_ROOTS);
-	has_references(24);
 	int x,rc;
-/*
+	printf("-----------------------------------------\n");
 	int nr[] = {6,18};
 	int nv1[] = {4,3,6};
 	int nv2[] = {0,0,24};
-	char *nt[] = {"INT", "IND", "CONS"};
+	char *nt[] = {"INT", "WEAK", "CONS"};
 	x = sizeof(nv1)/sizeof(nv1[0]);
 	rc = sizeof(nr)/sizeof(nr[0]);
 	mutate(nr, nv1, nv2, nt, x,rc);
-
+	printf("-----------------------------------------\n");
 	int nr1[] = {15};
 	int nv11[] = {24,18,3};
 	int nv21[] = {0,0,12};
-	char *nt1[] = {"INT", "IND", "CONS"};
+	char *nt1[] = {"IND", "WEAK", "CONS"};
 	x = sizeof(nv11)/sizeof(nv11[0]);
 	rc = sizeof(nr1)/sizeof(nr1[0]);
 	mutate(nr1, nv11, nv21, nt1, x, rc);
-
+	printf("-----------------------------------------\n");
 	int nr2[] = {27};
 	int nv12[] = {1,18,3,0,0,12,0};
 	int nv22[] = {0,0,12,0,0,12,0};
@@ -332,7 +338,7 @@ int main(int argc, char** argv){
 	x = sizeof(nv12)/sizeof(nv12[0]);
 	rc = sizeof(nr2)/sizeof(nr2[0]);
 	mutate(nr2, nv12, nv22, nt2, x,rc);
-*/
+
 	return 0;
 }
 
